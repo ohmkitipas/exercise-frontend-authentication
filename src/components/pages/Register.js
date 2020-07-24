@@ -1,15 +1,35 @@
 import React from 'react';
-import { Form, Input, Button, Row, Col, Divider } from 'antd';
+import { Form, Input, Button, Row, Col, Divider, notification } from 'antd';
+import axios from '../../config/axios';
 import Title from 'antd/lib/typography/Title';
+import { withRouter } from 'react-router-dom';
 
 const layout = {
     labelCol: { xs: 24, sm: 7, md: 6, lg: 6, xl: 5, xxl: 4 },
     wrapperCol: { xs: 24, sm: 17, md: 18, lg: 18, xl: 19, xxl: 20 },
 };
-export default function Register() {
+
+function Register(props) {
 
     const onFinish = values => {
         console.log('Received values of form: ', values);
+        const body = {
+            username: values.email,
+            password: values.password,
+            name: values.nickname
+        };
+        axios.post("/users/register", body)
+            .then(res => {
+                notification.success({
+                    message: `คุณ ${values.nickname} ได้สมัครสมาชิกเรียบร้อยแล้ว`,
+                });
+                props.history.push("/login");
+            })
+            .catch(err => {
+                notification.error({
+                    message: `การสมัครสมาชิกล้มเหลว`,
+                });
+            });
     };
 
     return (
@@ -63,11 +83,21 @@ export default function Register() {
                         <Form.Item
                             name="confirm"
                             label="Confirm Password"
+                            hasFeedback
+                            dependencies={["password"]}
                             rules={[
                                 {
                                     required: true,
                                     message: 'Please confirm your password!',
                                 },
+                                ({ getFieldValue }) => ({
+                                    validator(rule, value) {
+                                        if (!value || getFieldValue('password') === value) {
+                                            return Promise.resolve();
+                                        }
+                                        return Promise.reject("Comfirm Password ต้องตรงกับ Password");
+                                    }
+                                })
                             ]}
                         >
                             <Input.Password />
@@ -81,8 +111,8 @@ export default function Register() {
                             <Input />
                         </Form.Item>
 
-                            <Button className="Button" type="primary" htmlType="submit">
-                                Register
+                        <Button className="Button" type="primary" htmlType="submit">
+                            Register
                             </Button>
                     </Form>
                 </div>
@@ -90,3 +120,5 @@ export default function Register() {
         </Row>
     );
 }
+
+export default withRouter(Register);
