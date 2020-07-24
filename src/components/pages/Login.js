@@ -1,16 +1,30 @@
 import React from 'react';
-import { Form, Input, Button, Row, Col, Divider } from 'antd';
+import { Form, Input, Button, Row, Col, Divider, notification } from 'antd';
 import Title from 'antd/lib/typography/Title';
+import LocalStorageService from '../../services/LocalStorageService';
+import axios from '../../config/axios';
 
 const layout = {
     labelCol: { xs: 24, sm: 5, md: 4, lg: 5, xl: 4, xxl: 3 },
     wrapperCol: { xs: 24, sm: 19, md: 20, lg: 19, xl: 20, xxl: 21 },
 };
 
-export default function Login() {
+export default function Login(props) {
 
-    const onFinish = values => {
-        console.log('Success:', values);
+    const onFinish = ({ username, password }) => {
+        axios.post("/users/login", { username, password })
+            .then(({ data: { accessToken } }) => {
+                notification.success({
+                    message: `Login username: ${username} เรียบร้อย`
+                });
+                LocalStorageService.setToken(accessToken);
+                props.setRole("user");
+            })
+            .catch(err => {
+                notification.error({
+                    message: "Something ผิดพลาด"
+                });
+            });
     };
 
     return (

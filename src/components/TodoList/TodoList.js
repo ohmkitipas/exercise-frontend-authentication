@@ -10,7 +10,7 @@ export default function TodoList() {
     const [inputField, setInputField] = useState("");
 
     const fetchTodoList = async () => {
-        const httpResponse = await axios.get("/todo-list");
+        const httpResponse = await axios.get("/todos");
         setTodoList(httpResponse.data);
     };
 
@@ -19,12 +19,12 @@ export default function TodoList() {
     }, []);
 
     const addTodoItem = async () => {
-        await axios.post("/todo-list", { task: inputField });
+        await axios.post("/todos", { task: inputField });
         fetchTodoList();
     };
 
     const deleteTodoItem = async (id) => {
-        await axios.delete(`/todo-list/${id}`);
+        await axios.delete(`/todos/${id}`);
         fetchTodoList();
     };
 

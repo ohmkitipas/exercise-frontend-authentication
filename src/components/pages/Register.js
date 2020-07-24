@@ -1,15 +1,35 @@
 import React from 'react';
-import { Form, Input, Button, Row, Col, Divider } from 'antd';
+import { Form, Input, Button, Row, Col, Divider, notification } from 'antd';
 import Title from 'antd/lib/typography/Title';
+import axios from "../../config/axios";
+import { withRouter } from "react-router-dom";
 
 const layout = {
     labelCol: { xs: 24, sm: 7, md: 6, lg: 6, xl: 5, xxl: 4 },
     wrapperCol: { xs: 24, sm: 17, md: 18, lg: 18, xl: 19, xxl: 20 },
 };
-export default function Register() {
+function Register(props) {
+
+    console.log(props);
 
     const onFinish = values => {
-        console.log('Received values of form: ', values);
+        const { email, password, name } = values;
+        axios.post("/users/register", {
+            username: email,
+            password,
+            name,
+        })
+            .then(res => {
+                notification.success({
+                    message: "สมัครเสร็จเรียบร้อยแล้วนะจ๊ะจะบอกให้ถ้ายังไม่รู้ก็รู้ไว้ซะนะจ๊ะ อิอิ"
+                });
+                props.history.push("/login");
+            })
+            .catch(err => {
+                notification.error({
+                    message: "บางอย่าง Wrong"
+                });
+            });
     };
 
     return (
@@ -61,28 +81,40 @@ export default function Register() {
                         </Form.Item>
 
                         <Form.Item
+                            hasFeedback
                             name="confirm"
                             label="Confirm Password"
+                            dependencies={["password"]}
                             rules={[
                                 {
                                     required: true,
                                     message: 'Please confirm your password!',
                                 },
+                                function (form) {
+                                    const validator = function (rule, value) {
+                                        if (!value || form.getFieldValue('password') === value) {
+                                            return Promise.resolve();
+                                        }
+                                        return Promise.reject("ยินยันพาสเวิร์ด ต้องตรงกับ พาสเวิร์ด");
+                                    };
+
+                                    return { validator };
+                                }
                             ]}
                         >
                             <Input.Password />
                         </Form.Item>
 
                         <Form.Item
-                            name="nickname"
+                            name="name"
                             label={<span>Nickname&nbsp;</span>}
                             rules={[{ required: true, message: 'Please input your nickname!', whitespace: true }]}
                         >
                             <Input />
                         </Form.Item>
 
-                            <Button className="Button" type="primary" htmlType="submit">
-                                Register
+                        <Button className="Button" type="primary" htmlType="submit">
+                            Register
                             </Button>
                     </Form>
                 </div>
@@ -90,3 +122,5 @@ export default function Register() {
         </Row>
     );
 }
+
+export default withRouter(Register);

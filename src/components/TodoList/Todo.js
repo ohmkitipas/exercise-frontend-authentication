@@ -7,7 +7,7 @@ export default function Todo(props) {
     const [isEdit, setIsEdit] = useState(false);
 
     const updateTodoItem = async (id) => {
-        await axios.put(`/todo-list/${id}`, { task: changeInput });
+        await axios.patch(`/todos/${id}`, { task: changeInput });
         props.fetchData();
         setIsEdit(false);
     };
