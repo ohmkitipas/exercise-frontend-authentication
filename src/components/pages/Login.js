@@ -1,6 +1,9 @@
 import React from 'react';
-import { Form, Input, Button, Row, Col, Divider } from 'antd';
+import { Form, Input, Button, Row, Col, Divider, notification } from 'antd';
 import Title from 'antd/lib/typography/Title';
+import axios from '../../config/axios';
+import LocalStorageService from '../../services/localStorageService';
+import { result } from 'lodash';
 
 const layout = {
     labelCol: { xs: 24, sm: 5, md: 4, lg: 5, xl: 4, xxl: 3 },
@@ -10,7 +13,20 @@ const layout = {
 export default function Login() {
 
     const onFinish = values => {
-        console.log('Success:', values);
+        const body = {
+            username: values.username,
+            password: values.password
+        };
+        axios.post("/user/login", body)
+            .then(result =>{
+                LocalStorageService.setToken(result.data.token);
+                props.setRole("user");
+            })
+            .catch(err => {
+                notification.error({
+                    message: ` login failed`
+                });
+            });
     };
 
     return (
